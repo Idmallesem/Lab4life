@@ -70,5 +70,5 @@ jobs:
             latest="$(ls -t *.jar | head -n 1)"
             test -n "$latest"
             cp -f "$latest" /opt/app/Lab4life/app.jar
-            sudo systemctl restart app
-            sudo systemctl status app --no-pager
+            sudo -n /usr/bin/systemctl restart app
+            sudo -n /usr/bin/systemctl status app --no-pager
