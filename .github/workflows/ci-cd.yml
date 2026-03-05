@@ -66,10 +66,9 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -eux
-            cd /opt/app/Lab4life
-            ls -la
+            cd /opt/app/Lab4life/backend/target
             latest="$(ls -t *.jar | head -n 1)"
             test -n "$latest"
-            mv -f "$latest" app.jar
+            cp -f "$latest" /opt/app/Lab4life/app.jar
             sudo systemctl restart app
             sudo systemctl status app --no-pager
