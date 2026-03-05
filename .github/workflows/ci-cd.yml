@@ -18,9 +18,11 @@ jobs:
 
       - name: Run tests
         run: mvn -B test
+        working-directory: backend
 
       - name: Build jar
         run: mvn -B -DskipTests package
+        working-directory: backend
 
       - name: Upload jar to server
         if: github.ref == 'refs/heads/main'
