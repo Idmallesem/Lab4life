@@ -6,8 +6,9 @@ on:
   pull_request:
 
 jobs:
-  test_build:
+  build_and_deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -15,10 +16,11 @@ jobs:
         with:
           distribution: temurin
           java-version: "25"
+
       - name: Verify Java
         run: |
-            java -version
-            mvn -v
+          java -version
+          mvn -v
 
       - name: Run tests
         run: mvn -B test
@@ -27,6 +29,19 @@ jobs:
       - name: Build jar
         run: mvn -B -DskipTests package
         working-directory: backend
+
+      - name: Ensure deploy dir exists
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -eux
+            mkdir -p /opt/app/Lab4life
+            ls -ld /opt/app/Lab4life
 
       - name: Upload jar to server
         if: github.ref == 'refs/heads/main'
@@ -38,14 +53,11 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "backend/target/*.jar"
           target: "/opt/app/Lab4life"
+          overwrite: true
           debug: true
 
-  deploy:
-    needs: test_build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Restart service
+      - name: Activate jar and restart service
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -53,9 +65,11 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ${{ secrets.APP_DIR }}
+            set -eux
+            cd /opt/app/Lab4life
+            ls -la
             latest="$(ls -t *.jar | head -n 1)"
+            test -n "$latest"
             mv -f "$latest" app.jar
-            sudo systemctl start app || true
             sudo systemctl restart app
             sudo systemctl status app --no-pager
