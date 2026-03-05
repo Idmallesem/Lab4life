@@ -36,7 +36,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           port: ${{ secrets.SERVER_PORT }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "target/*.jar"
+          source: "backend/target/*.jar"
           target: "${{ secrets.APP_DIR }}"
           strip_components: 1
 
