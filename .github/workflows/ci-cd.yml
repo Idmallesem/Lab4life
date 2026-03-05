@@ -39,6 +39,7 @@ jobs:
           source: "backend/target/*.jar"
           target: "${{ secrets.APP_DIR }}"
           strip_components: 1
+          debug: true
 
   deploy:
     needs: test_build
